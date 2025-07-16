@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div id="bsicon-selector">
+    <div class="search-container">
+        <input type="text" class="search" placeholder="Buscar iconos..." />
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            {% for style in styles %}
+            <button class="filter-btn" data-filter="{{ style }}">{{ style|title }}</button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="icon-list">
+        <div class="list">
+            {% for icon in icons %}
+            <div class="icon-item" data-name="{{ icon.name }}" data-styles="{{ icon.styles|join:' ' }}">
+                <div class="icon-preview" data-icon="{{ icon.name }}">
+                    <i class="bi bi-{{ icon.name }}"></i>
+                </div>
+                <div class="icon-name">{{ icon.name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+    // Configuración de List.js
+    const options = {
+        valueNames: ['icon-name', 'data-styles'],
+        searchClass: 'search',
+        listClass: 'list'
+    };
+    
+    const iconList = new List('bsicon-selector', options);
+    
+    // Filtros por estilo
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            if (filter === 'all') {
+                iconList.filter();
+            } else {
+                iconList.filter(item => item.values().styles.includes(filter));
+            }
+        });
+    });
+    
+    // Selección de icono
+    document.querySelectorAll('.icon-preview').forEach(icon => {
+        icon.addEventListener('click', function() {
+            const iconName = this.dataset.icon;
+            window.opener.document.getElementById(window.name).value = iconName;
+            window.close();
+        });
+    });
+</script>
+{% endblock %}
